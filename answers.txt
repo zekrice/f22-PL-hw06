@@ -1,0 +1,98 @@
+Task 1
+By looking at this function, it seems f takes in a parameter 5, which would return a function that takes (x+1) as a parameter.  After that function runs, 1 is added.  Based on this, I can assume that the type for the function is int.
+
+Task 2
+1. Write in curried form
+fun f x -> (f 5 (x+1)) + 1
+fun f -> fun x -> (f 5 (x+1)) + 1
+fun f -> fun x -> ((f 5) (x+1)) + 1
+fun f -> fun x -> ((f 5) (((+) x) 1)) + 1
+fun f -> fun x -> ((+) ((f 5) (((+) x) 1))) 1
+
+2. Build expression and subexpressions with corresponding types
+ 
+                                                        TYPE
+fun f -> fun x -> ((+) ((f 5) (((+) x) 1))) 1           A
+    f                                                   B
+         fun x -> ((+) ((f 5) (((+) x) 1))) 1           C
+             x                                          D
+                  ((+) ((f 5) (((+) x) 1))) 1           E
+                  ((+) ((f 5) (((+) x) 1)))             F
+                   (+)                                  int -> (int -> int)
+                       ((f 5) (((+) x) 1))              G
+                        (f 5)                           H
+                         f                              I
+                           5                            int 
+                               ((+) x) 1                J
+                               ((+) x)                  K
+                                (+)                     int -> (int -> int)
+                                    x                   L
+                                       1                int
+                                            1           int
+
+3. Constraints
+B = I                           #let/use
+D = L                           #let/use
+A = B -> C                      #function def
+C = D -> E                      #function def
+F = int -> E                    #function call 
+int -> (int -> int) = G -> F    #function call
+H = J -> G                      #function call
+I = int -> H                    #function call
+K = int -> J                    #function call
+int -> (int -> int) = L -> K    #function call
+
+4. Solve
+
+(1)  B = I, D = L, A = B -> C, C = D -> E, F = int -> E, int -> (int -> int) = G -> F, H = J -> G, I = int -> H, K = int -> J, 
+int -> (int -> int) = L -> K    #Starting point
+
+(2)  D = L, A = B -> C, C = D -> E, F = int -> E, int -> (int -> int) = G -> F, H = J -> G, B = int -> H, K = int -> J, 
+int -> (int -> int) = L -> K    #Replaced all 'I' with 'B'
+
+(3)  A = B -> C, C = D -> E, F = int -> E, int -> (int -> int) = G -> F, H = J -> G, B = int -> H, K = int -> J, 
+int -> (int -> int) = D -> K    #Replaced all 'L' with 'D'
+
+(4)  A = B -> (D -> E), F = int -> E, int -> (int -> int) = G -> F, H = J -> G, B = int -> H, K = int -> J, 
+int -> (int -> int) = D -> K    #Replace 'C' with 'D -> E'
+
+(5)  A = B -> (D -> E), F = int -> E, G = int, (int -> int) = F, H = J -> G, B = int -> H, K = int -> J, 
+int -> (int -> int) = D -> K    #Used important rule on 'int -> (int -> int) = G -> F'
+
+(6)  A = B -> (D -> E), F = int -> E, G = int, (int -> int) = F, H = J -> G, B = int -> H, K = int -> J, 
+D = int, (int -> int) = K      #Used important rule on 'int -> (int -> int) = D -> K'
+
+(7)  A = B -> (D -> E), F = int -> E, (int -> int) = F, H = J -> int, B = int -> H, K = int -> J, 
+D = int, (int -> int) = K      #Replace 'G' with 'int'
+
+(8)  A = B -> (int -> E), F = int -> E, (int -> int) = F, H = J -> int, B = int -> H, K = int -> J, 
+(int -> int) = K               #Replace 'D' with 'int'
+
+(9)  A = B -> (int -> E), int -> E = int -> int, H = J -> int, B = int -> H, K = int -> J, 
+(int -> int) = K               #Set 'F' equal to other 'F'. tldr, these two: [F = int -> E, (int -> int) = F]
+
+(10) A = B -> (int -> E), int = int, E = int, H = J -> int, B = int -> H, K = int -> J, 
+(int -> int) = K               #Used important rule on 'int -> E = int -> int'
+
+(11) A = B -> (int -> int), H = J -> int, B = int -> H, K = int -> J, 
+(int -> int) = K               #Remove 'int = int' and replace 'E' with 'int'
+
+(12) A = B -> (int -> int), H = J -> int, B = int -> H, int -> J = (int -> int)
+#Set 'K' equal to other 'K'.  tldr, these two: [K = int -> J, (int -> int) = K]
+
+(13) A = B -> (int -> int), H = J -> int, B = int -> H, J = int, int = int
+#Used important rule on 'int -> J = (int -> int)'
+
+(14) A = B -> (int -> int), H = int -> int, B = int -> H
+#Remove 'int = int' and replace 'J' with 'int'
+
+(15) A = B -> (int -> int), B = int -> int -> int
+#Replace 'H' with 'int -> int'
+
+(16) A = (int -> int -> int) -> (int -> int)
+#Replace 'B' with 'int -> int -> int'
+
+(17) A = (int -> int -> int) -> int -> int
+#Right-associativity
+
+Conclusion: The type or output of the original function is of type int
