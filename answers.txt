@@ -92,5 +92,5 @@ D = int, (int -> int) = K      #Replace 'G' with 'int'
 (16) A = (int -> int -> int) -> (int -> int)
 #Replace 'B' with 'int -> int -> int'
 
-(17) A = (int -> int -> int) -> int -> int
-#Right-associativity?
+(17?) A = (int -> int -> int) -> int -> int
+#Right-associativity
